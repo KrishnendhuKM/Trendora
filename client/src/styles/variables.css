@@ -1,0 +1,33 @@
+
+:root {
+  /* Brand colours */
+  --color-espresso: #49372B;
+  --color-mocha: #806653;
+  --color-taupe: #B9A28A;
+  --color-sand: #E9DFD0;
+  --color-ivory: #FAF7F2;
+
+  /* Text colours */
+  --color-heading: #30251F;
+  --color-text: #655B53;
+  --color-muted: #999087;
+
+  /* Backgrounds */
+  --color-background: #FAF7F2;
+  --color-white: #FFFFFF;
+
+  /* Borders */
+  --color-border: #E8E0D7;
+
+  /* Typography */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Layout */
+  --container-width: 1280px;
+  --header-height: 80px;
+
+  /* Effects */
+  --transition: all 0.3s ease;
+  --shadow-soft: 0 4px 20px rgba(73, 55, 43, 0.08);
+}
