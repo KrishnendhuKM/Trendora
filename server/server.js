@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 
 import connectDB from "./config/db.js";
+import productRoutes from "./routes/productRoutes.js";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use("/api/products", productRoutes);
 
 // Health check route
 app.get("/", (req, res) => {

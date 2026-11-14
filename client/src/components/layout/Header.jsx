@@ -1,13 +1,39 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, Heart, ShoppingBag, Menu, X } from 'lucide-react';
+import { Link, NavLink } from 'react-router-dom';
+import { useCart } from '../../context/CartContext.jsx';
+import { useWishlist } from '../../context/WishlistContext.jsx';
+import {
+  Search,
+  Heart,
+  ShoppingBag,
+  Menu,
+  X,
+  ChevronDown,
+} from 'lucide-react';
+
 import './Header.css';
 
 function Header() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { cartCount } = useCart();
+  const { wishlistItems } = useWishlist();
 
-  const closeMenu = () => setMenuOpen(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [collectionsOpen, setCollectionsOpen] = useState(false);
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setCollectionsOpen(false);
+  };
+
+  const categories = [
+    { name: 'Dresses', path: '/category/dresses' },
+    { name: 'Tops', path: '/category/tops' },
+    { name: 'Handbags', path: '/category/handbags' },
+    { name: 'Footwear', path: '/category/footwear' },
+    { name: 'Watches', path: '/category/watches' },
+    { name: 'Accessories', path: '/category/accessories' },
+  ];
 
   return (
     <header className="site-header">
@@ -24,27 +50,87 @@ function Header() {
           {menuOpen ? <X size={23} /> : <Menu size={23} />}
         </button>
 
-        <Link to="/" className="brand-logo">
+        <Link to="/" className="brand-logo" onClick={closeMenu}>
           TRENDORA<span>.</span>
         </Link>
 
         <nav className={`main-nav ${menuOpen ? 'nav-open' : ''}`}>
-          <a href="#collections" onClick={closeMenu}>Collections</a>
-          <a href="#new-arrivals" onClick={closeMenu}>New Arrivals</a>
-          <a href="#best-sellers" onClick={closeMenu}>Best Sellers</a>
-          <a href="#sale" onClick={closeMenu}>Sale</a>
+          <div className="nav-dropdown">
+            <div className="collections-nav">
+              <NavLink to="/collections" onClick={closeMenu}>
+                Collections
+              </NavLink>
+
+              <button
+                className="nav-dropdown-toggle"
+                onClick={() => setCollectionsOpen(!collectionsOpen)}
+                aria-label="Toggle collections categories"
+                aria-expanded={collectionsOpen}
+              >
+                <ChevronDown size={15} />
+              </button>
+            </div>
+
+            <div
+              className={`dropdown-menu ${
+                collectionsOpen ? 'dropdown-open' : ''
+              }`}
+            >
+              <NavLink to="/collections" onClick={closeMenu}>
+                View All Collections
+              </NavLink>
+
+              {categories.map((category) => (
+                <NavLink
+                  key={category.path}
+                  to={category.path}
+                  onClick={closeMenu}
+                >
+                  {category.name}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+
+          <NavLink to="/new-arrivals" onClick={closeMenu}>
+            New Arrivals
+          </NavLink>
+
+          <NavLink to="/best-sellers" onClick={closeMenu}>
+            Best Sellers
+          </NavLink>
+
+          <NavLink to="/sale" onClick={closeMenu}>
+            Sale
+          </NavLink>
         </nav>
 
         <div className="header-actions">
           <button aria-label="Search">
             <Search size={20} />
           </button>
-          <button aria-label="Wishlist">
-            <Heart size={20} />
-          </button>
-          <button aria-label="Shopping bag">
+
+          <Link
+  to="/wishlist"
+  aria-label={`Wishlist, ${wishlistItems.length} items`}
+  className="wishlist-link"
+>
+  <Heart size={20} />
+
+  {wishlistItems.length > 0 && (
+    <span className="wishlist-count">
+      {wishlistItems.length}
+    </span>
+  )}
+</Link>
+
+          <Link to="/cart" aria-label={`Shopping bag, ${cartCount} items`} className="cart-link">
             <ShoppingBag size={20} />
-          </button>
+
+          {cartCount > 0 && (
+          <span className="cart-count">{cartCount}</span>
+      )}
+</Link>
         </div>
       </div>
     </header>
