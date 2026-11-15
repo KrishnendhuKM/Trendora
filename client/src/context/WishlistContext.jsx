@@ -13,7 +13,6 @@ export const useWishlist = () => {
 };
 
 function WishlistProvider({ children }) {
-  // Load saved wishlist
   const [wishlistItems, setWishlistItems] = useState(() => {
     try {
       const savedWishlist = localStorage.getItem('trendora-wishlist');
@@ -25,7 +24,6 @@ function WishlistProvider({ children }) {
     }
   });
 
-  // Save wishlist whenever it changes
   useEffect(() => {
     localStorage.setItem(
       'trendora-wishlist',
@@ -37,7 +35,7 @@ function WishlistProvider({ children }) {
   const addToWishlist = (product) => {
     setWishlistItems((currentItems) => {
       const alreadyExists = currentItems.some(
-        (item) => item.id === product.id
+        (item) => item._id === product._id
       );
 
       if (alreadyExists) return currentItems;
@@ -49,13 +47,13 @@ function WishlistProvider({ children }) {
   // Remove product from wishlist
   const removeFromWishlist = (productId) => {
     setWishlistItems((currentItems) =>
-      currentItems.filter((item) => item.id !== productId)
+      currentItems.filter((item) => item._id !== productId)
     );
   };
 
   // Check whether product is in wishlist
   const isInWishlist = (productId) => {
-    return wishlistItems.some((item) => item.id === productId);
+    return wishlistItems.some((item) => item._id === productId);
   };
 
   const value = {

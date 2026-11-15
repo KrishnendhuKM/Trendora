@@ -1,7 +1,7 @@
 
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { categoryProducts } from './Category.jsx';
+import { useProducts } from '../context/ProductContext.jsx';
 import './Home.css';
 
 const categories = [
@@ -11,20 +11,9 @@ const categories = [
   { name: 'Accessories', image: 'photo-1611652022419-a9419f74343d' }
 ];
 
-const allProducts = Object.values(categoryProducts).flat();
-
-const newArrivals = allProducts.slice(-4);
-
-// Demo featured products for the Best Sellers section
-const bestSellers = allProducts.slice(0, 4);
-
-// Demo sale products with a 20% discount
-const saleProducts = allProducts.slice(1, 5).map((product) => ({
-  ...product,
-  salePrice: Math.round(product.price * 0.8)
-}));
-
 function ProductSection({ label, title, description, products }) {
+  if (products.length === 0) return null;
+
   return (
     <section className="home-products-section container">
       <div className="section-heading">
@@ -36,9 +25,9 @@ function ProductSection({ label, title, description, products }) {
       <div className="home-products-grid">
         {products.map((product) => (
           <Link
-            to={`/product/${product.id}`}
+            to={`/product/${product._id}`}
             className="home-product-card"
-            key={product.id}
+            key={product._id}
           >
             <div className="home-product-image">
               <img src={product.image} alt={product.name} />
@@ -61,6 +50,24 @@ function ProductSection({ label, title, description, products }) {
 }
 
 function Home() {
+  const { products, loading, error } = useProducts();
+
+  const newArrivals = products.filter(
+    (product) => product.isNew
+  ).slice(0, 4);
+
+  const bestSellers = products.filter(
+    (product) => product.isBestSeller
+  ).slice(0, 4);
+
+  const saleProducts = products.filter(
+    (product) => product.isOnSale && product.salePrice
+  ).slice(0, 4);
+
+  if (loading) return <p>Loading Trendora...</p>;
+
+  if (error) return <p>{error}</p>;
+
   return (
     <main>
       <section className="hero-section">
@@ -115,64 +122,66 @@ function Home() {
         </div>
       </section>
 
-      <div id="new-arrivals">
-        <ProductSection
-          label="JUST LANDED"
-          title="New Arrivals"
-          description="Fresh finds for your wardrobe."
-          products={newArrivals}
-        />
-      </div>
+      <ProductSection
+        label="JUST LANDED"
+        title="New Arrivals"
+        description="Fresh finds for your wardrobe."
+        products={newArrivals}
+      />
 
-      <div id="best-sellers">
-        <ProductSection
-          label="MOST LOVED"
-          title="Best Sellers"
-          description="The styles everyone is loving."
-          products={bestSellers}
-        />
-      </div>
+      <ProductSection
+        label="MOST LOVED"
+        title="Best Sellers"
+        description="The styles everyone is loving."
+        products={bestSellers}
+      />
 
-      <section className="sale-section" id="sale">
-        <p>THE TRENDORA EDIT</p>
-        <h2>A little something special.</h2>
-        <span>Enjoy 20% off selected styles.</span>
-      </section>
+      {saleProducts.length > 0 && (
+        <>
+          <section className="sale-section" id="sale">
+            <p>THE TRENDORA EDIT</p>
+            <h2>A little something special.</h2>
+            <span>Enjoy special prices on selected styles.</span>
+          </section>
 
-      <section className="home-products-section container">
-        <div className="section-heading">
-          <p>LIMITED-TIME OFFERS</p>
-          <h2>Shop the Sale</h2>
-          <span>Beautiful styles at special prices.</span>
-        </div>
+          <section className="home-products-section container">
+            <div className="section-heading">
+              <p>LIMITED-TIME OFFERS</p>
+              <h2>Shop the Sale</h2>
+              <span>Beautiful styles at special prices.</span>
+            </div>
 
-        <div className="home-products-grid">
-          {saleProducts.map((product) => (
-            <Link
-              to={`/product/${product.id}`}
-              className="home-product-card"
-              key={product.id}
-            >
-              <div className="home-product-image">
-                <img src={product.image} alt={product.name} />
-                <span className="home-product-badge">20% OFF</span>
-              </div>
+            <div className="home-products-grid">
+              {saleProducts.map((product) => (
+                <Link
+                  to={`/product/${product._id}`}
+                  className="home-product-card"
+                  key={product._id}
+                >
+                  <div className="home-product-image">
+                    <img src={product.image} alt={product.name} />
+                    <span className="home-product-badge">
+                      SALE
+                    </span>
+                  </div>
 
-              <div className="home-product-info">
-                <h3>{product.name}</h3>
-                <p>
-                  <strong>
-                    ₹{product.salePrice.toLocaleString('en-IN')}
-                  </strong>
-                  <del>
-                    ₹{product.price.toLocaleString('en-IN')}
-                  </del>
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+                  <div className="home-product-info">
+                    <h3>{product.name}</h3>
+                    <p>
+                      <strong>
+                        ₹{product.salePrice.toLocaleString('en-IN')}
+                      </strong>
+                      <del>
+                        ₹{product.price.toLocaleString('en-IN')}
+                      </del>
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
     </main>
   );
 }

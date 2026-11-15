@@ -1,5 +1,5 @@
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 import './Cart.css';
 
@@ -10,6 +10,12 @@ function Cart() {
     updateQuantity,
     cartTotal,
   } = useCart();
+
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    navigate('/checkout');
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -34,13 +40,14 @@ function Cart() {
           {cartItems.map((item) => (
             <div
               className="cart-item"
-              key={`${item.id}-${item.size}`}
+              key={`${item._id}-${item.size}`}
             >
               <img src={item.image} alt={item.name} />
 
               <div className="cart-item-info">
                 <h3>{item.name}</h3>
                 <p>Size: {item.size}</p>
+
                 <p className="cart-item-price">
                   ₹{item.price.toLocaleString('en-IN')}
                 </p>
@@ -49,7 +56,7 @@ function Cart() {
                   <button
                     onClick={() =>
                       updateQuantity(
-                        item.id,
+                        item._id,
                         item.size,
                         item.quantity - 1
                       )
@@ -64,7 +71,7 @@ function Cart() {
                   <button
                     onClick={() =>
                       updateQuantity(
-                        item.id,
+                        item._id,
                         item.size,
                         item.quantity + 1
                       )
@@ -77,7 +84,7 @@ function Cart() {
                 <button
                   className="remove-item"
                   onClick={() =>
-                    removeFromCart(item.id, item.size)
+                    removeFromCart(item._id, item.size)
                   }
                 >
                   Remove
@@ -111,7 +118,10 @@ function Cart() {
             <span>₹{cartTotal.toLocaleString('en-IN')}</span>
           </div>
 
-          <button className="checkout-button">
+          <button
+            className="checkout-button"
+            onClick={handleCheckout}
+          >
             Proceed to Checkout
           </button>
 

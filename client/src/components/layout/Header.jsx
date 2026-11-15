@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useCart } from '../../context/CartContext.jsx';
 import { useWishlist } from '../../context/WishlistContext.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+
 import {
   Search,
   Heart,
@@ -17,6 +19,7 @@ import './Header.css';
 function Header() {
   const { cartCount } = useCart();
   const { wishlistItems } = useWishlist();
+  const { user, logout } = useAuth();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [collectionsOpen, setCollectionsOpen] = useState(false);
@@ -42,6 +45,7 @@ function Header() {
       </div>
 
       <div className="header-main container">
+
         <button
           className="mobile-menu-button"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -106,31 +110,49 @@ function Header() {
         </nav>
 
         <div className="header-actions">
+
           <button aria-label="Search">
             <Search size={20} />
           </button>
 
           <Link
-  to="/wishlist"
-  aria-label={`Wishlist, ${wishlistItems.length} items`}
-  className="wishlist-link"
->
-  <Heart size={20} />
+            to="/wishlist"
+            aria-label={`Wishlist, ${wishlistItems.length} items`}
+            className="wishlist-link"
+          >
+            <Heart size={20} />
 
-  {wishlistItems.length > 0 && (
-    <span className="wishlist-count">
-      {wishlistItems.length}
-    </span>
-  )}
-</Link>
+            {wishlistItems.length > 0 && (
+              <span className="wishlist-count">
+                {wishlistItems.length}
+              </span>
+            )}
+          </Link>
 
-          <Link to="/cart" aria-label={`Shopping bag, ${cartCount} items`} className="cart-link">
+          <Link
+            to="/cart"
+            aria-label={`Shopping bag, ${cartCount} items`}
+            className="cart-link"
+          >
             <ShoppingBag size={20} />
 
-          {cartCount > 0 && (
-          <span className="cart-count">{cartCount}</span>
-      )}
-</Link>
+            {cartCount > 0 && (
+              <span className="cart-count">{cartCount}</span>
+            )}
+          </Link>
+
+          {user ? (
+            <div className="header-user">
+              <span>Hi, {user.name}</span>
+              <button onClick={logout}>Logout</button>
+            </div>
+          ) : (
+            <div className="header-auth-links">
+              <Link to="/login">Login</Link>
+              <Link to="/register">Register</Link>
+            </div>
+          )}
+
         </div>
       </div>
     </header>

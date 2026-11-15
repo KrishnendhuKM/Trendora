@@ -8,16 +8,12 @@ import {
 
 const CartContext = createContext();
 
-export const useCart = () => {
-  return useContext(CartContext);
-};
+export const useCart = () => useContext(CartContext);
 
 function CartProvider({ children }) {
-  // Load previously saved cart items
   const [cartItems, setCartItems] = useState(() => {
     try {
       const savedCart = localStorage.getItem('trendora-cart');
-
       return savedCart ? JSON.parse(savedCart) : [];
     } catch (error) {
       console.error('Unable to load cart:', error);
@@ -25,7 +21,7 @@ function CartProvider({ children }) {
     }
   });
 
-  // Save cart items whenever they change
+  // Save cart whenever items change
   useEffect(() => {
     localStorage.setItem(
       'trendora-cart',
@@ -37,25 +33,18 @@ function CartProvider({ children }) {
   const addToCart = (product, size, quantity) => {
     setCartItems((currentItems) => {
       const existingItem = currentItems.find(
-        (item) => item.id === product.id && item.size === size
+        (item) => item._id === product._id && item.size === size
       );
 
       if (existingItem) {
         return currentItems.map((item) =>
-          item.id === product.id && item.size === size
+          item._id === product._id && item.size === size
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
 
-      return [
-        ...currentItems,
-        {
-          ...product,
-          size,
-          quantity,
-        },
-      ];
+      return [...currentItems, { ...product, size, quantity }];
     });
   };
 
@@ -63,7 +52,7 @@ function CartProvider({ children }) {
   const removeFromCart = (productId, size) => {
     setCartItems((currentItems) =>
       currentItems.filter(
-        (item) => !(item.id === productId && item.size === size)
+        (item) => !(item._id === productId && item.size === size)
       )
     );
   };
@@ -74,7 +63,7 @@ function CartProvider({ children }) {
 
     setCartItems((currentItems) =>
       currentItems.map((item) =>
-        item.id === productId && item.size === size
+        item._id === productId && item.size === size
           ? { ...item, quantity }
           : item
       )
@@ -93,17 +82,23 @@ function CartProvider({ children }) {
     0
   );
 
-  const value = {
-    cartItems,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    cartCount,
-    cartTotal,
+  // Clear cart after successful order
+  const clearCart = () => {
+    setCartItems([]);
   };
 
   return (
-    <CartContext.Provider value={value}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        cartCount,
+        cartTotal,
+        clearCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

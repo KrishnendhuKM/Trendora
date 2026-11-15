@@ -1,22 +1,30 @@
 
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { categoryProducts } from './Category.jsx';
-import './ProductDetails.css';
+import { useProducts } from '../context/ProductContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
+import './ProductDetails.css';
 
 function ProductDetails() {
   const { id } = useParams();
+
+  const { products, loading, error } = useProducts();
   const { addToCart } = useCart();
-
-  const allProducts = Object.values(categoryProducts).flat();
-
-  const product = allProducts.find(
-    (item) => item.id === Number(id)
-  );
 
   const [selectedSize, setSelectedSize] = useState('');
   const [quantity, setQuantity] = useState(1);
+
+  const product = products.find(
+    (item) => item._id === id
+  );
+
+  if (loading) {
+    return <p className="container">Loading product...</p>;
+  }
+
+  if (error) {
+    return <p className="container">{error}</p>;
+  }
 
   if (!product) {
     return (
@@ -28,16 +36,19 @@ function ProductDetails() {
     );
   }
 
-const handleAddToCart = () => {
-  if (!selectedSize) {
-    alert('Please select a size before adding to cart.');
-    return;
-  }
+  const sizes = product.sizes || [];
 
-  addToCart(product, selectedSize, quantity);
+  const handleAddToCart = () => {
+    if (sizes.length > 0 && !selectedSize) {
+      alert('Please select a size before adding to cart.');
+      return;
+    }
 
-  alert(`${product.name} added to cart!`);
-};
+    addToCart(product, selectedSize || 'One Size', quantity);
+
+    alert(`${product.name} added to cart!`);
+  };
+
   return (
     <main className="product-details-page container">
 
@@ -70,28 +81,29 @@ const handleAddToCart = () => {
           </p>
 
           <p className="details-description">
-            Discover effortless elegance with this beautiful
-            addition to your wardrobe. Designed to bring
-            comfort and style to your everyday moments.
+            {product.description ||
+              'Discover effortless elegance with this beautiful addition to your wardrobe. Designed to bring comfort and style to your everyday moments.'}
           </p>
 
-          <div className="details-option">
-            <h3>Select Size</h3>
+          {sizes.length > 0 && (
+            <div className="details-option">
+              <h3>Select Size</h3>
 
-            <div className="size-options">
-              {['S', 'M', 'L', 'XL'].map((size) => (
-                <button
-                  key={size}
-                  className={
-                    selectedSize === size ? 'size-selected' : ''
-                  }
-                  onClick={() => setSelectedSize(size)}
-                >
-                  {size}
-                </button>
-              ))}
+              <div className="size-options">
+                {sizes.map((size) => (
+                  <button
+                    key={size}
+                    className={
+                      selectedSize === size ? 'size-selected' : ''
+                    }
+                    onClick={() => setSelectedSize(size)}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="details-option">
             <h3>Quantity</h3>
@@ -108,6 +120,7 @@ const handleAddToCart = () => {
 
               <button
                 onClick={() => setQuantity((q) => q + 1)}
+                disabled={quantity >= product.stock}
               >
                 +
               </button>
@@ -117,8 +130,9 @@ const handleAddToCart = () => {
           <button
             className="add-to-cart-button"
             onClick={handleAddToCart}
+            disabled={product.stock < 1}
           >
-            Add to Cart
+            {product.stock < 1 ? 'Out of Stock' : 'Add to Cart'}
           </button>
 
           <p className="details-shipping">
